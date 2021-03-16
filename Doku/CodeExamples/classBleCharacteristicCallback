@@ -1,0 +1,32 @@
+class bleCharacteristicCallback: public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic) {
+    std::string msg = pCharacteristic->getValue();
+    Serial.printf("msg: %s|\n", msg.c_str());    
+    //Serial.flush();       //Um Buffer zu leeren.
+    delay(5000);
+    //App Input Auswertung
+    Serial.printf("Laenge: %d\n", msg.length());
+    if (msg.at(0) == 'f' && msg.at(1) == 'r' && msg.at(2) == 'e' && msg.at(3) == 'e'/*msg.compare("free") == 0*/) {   //String so pruefen, weil die App ein mir unbekanntes Whitespace anhaengt.
+      Serial.println("FREE");
+      freeRooms();
+    } 
+    //Z.B. "8 9" ; Laenge von AI2 um 1 groesser.
+    else if (msg.length() == 4) {
+      Serial.printf("%d | %d\n", int(msg.at(0)), int(msg.at(2)));
+      bookRoom(int(msg.at(0)) - 48, int(msg.at(2)) - 48);     //-48 because of char to int
+    }
+    //z.B. "9 16"
+    else if (msg.length() == 5) {
+      char buf[3] = {msg.at(2), msg.at(3)};
+      Serial.printf("%d | %d\n", int(msg.at(0)) - 48, atoi(buf));
+      bookRoom(int(msg.at(0)) - 48, atoi(buf));
+    } 
+    //z.B. "19 20"
+    else if (msg.length() == 6) {
+      char buf[3] = {msg.at(0), msg.at(1)};
+      char buf1[3] = {msg.at(3), msg.at(4)};
+      Serial.printf("%d | %d\n", atoi(buf), atoi(buf1));
+      bookRoom(atoi(buf), atoi(buf1));
+    }
+  }
+};

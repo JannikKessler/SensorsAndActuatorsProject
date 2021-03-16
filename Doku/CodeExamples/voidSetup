@@ -1,0 +1,44 @@
+void setup() {
+  Serial.begin(115200);
+  Serial.println("# starte ble server");
+  // ble initialisieren
+  BLEDevice::init("ESP-SRV");
+  // ble server erzeugen
+  BLEServer *pServer = BLEDevice::createServer();
+  // server callbacks installieren
+  pServer->setCallbacks(new MyServerCallbacks());
+  // service erzeugen
+  BLEService *pService = pServer->createService(SERV_UUID);
+  // characteristic erzeugen und einstellen welche Properties es haben soll.
+  pCharacteristic = pService->createCharacteristic(
+        CHAR_UUID, 
+        BLECharacteristic::PROPERTY_READ |
+        BLECharacteristic::PROPERTY_WRITE |
+        BLECharacteristic::PROPERTY_NOTIFY |
+        BLECharacteristic::PROPERTY_INDICATE);
+  // descriptor erzeugen - fuer notify/indicate notwendig. Fuer die "Pipe" zustaendig schaetze ich.
+  pCharacteristic->addDescriptor(new BLE2902());
+  // service starten
+  pService->start();
+  pCharacteristic->setCallbacks(new bleCharacteristicCallback());
+
+  // advertising starten
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(SERV_UUID);
+  pAdvertising->setScanResponse(true);
+  pAdvertising->setMinPreferred(0x06); 
+  pAdvertising->setMinPreferred(0x12);
+  BLEDevice::startAdvertising();
+  Serial.println("# ble server gestartet. warte auf anrufe ...");
+  delay(5000);    //Ansonsten wird die naechste Methode uebersprungen.
+  if (firstStart || newConnection) {
+    initDisplay();
+    firstStart = false;
+    newConnection = false;
+  }
+  Serial.println("Enter Command: ");
+
+  if (!isConnected){
+    startSleep();
+  }
+}
