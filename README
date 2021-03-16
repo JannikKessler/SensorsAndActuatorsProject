@@ -1,5 +1,7 @@
 In diesem Solo-Projekt habe ich eine E-Paper Raumreservierung implementiert. Zur Steuerung des E-Papers gibt es noch eine App.
 
+Projektdauer: 2 Monate
+
 Erforderliche Arduino Libraries:
 + GxEPD2
 + Adafruit_GFX_Library
